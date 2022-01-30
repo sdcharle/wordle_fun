@@ -44,7 +44,9 @@ wlist <- five_ew # big list
 letters <- stringr::str_c(wlist, collape = '')
 letters <- stringr::str_flatten(wlist, collapse = "")
 a_count = str_count(letters, pattern = 'a')
-
+# Next - weight by usage of the word in English
+# what the fuck?
+wlist <- wlist[wlist != 'fête']
 # get it all
 alphas <- 'abcdefghijklmnopqrstuvwxyz'
 w_stats <- list()
@@ -67,20 +69,6 @@ for (i in 1:26) {
 
 letter_stats <- do.call(rbind, w_stats)
 
-# great, now what?
-
-SO <- "
-
-'s''e' 'a' 'r' are good starting letters but what then? score all the words, 
-based on the stats....
-
-
-
-
-"
-
-# additive
-
 word_score_add <- function(word) {
   score = 0
   for (i in 1:5) { # go over letters and sum up if they appear anywhere
@@ -97,20 +85,15 @@ word_score_add <- function(word) {
 # multiplicative - overflows or underflows - use logs to our advantage?
 # this based just on if there's a direct hit
 word_score_mult <- function(word) {
-  
   log_score = log(
-    letter_stats[letter_stats$letter == str_sub(word,1,1),]$count1/(sum(letter_stats$count1) )*
-      letter_stats[letter_stats$letter == str_sub(word,2,2),]$count2/(sum(letter_stats$count2) ) * 
-      letter_stats[letter_stats$letter == str_sub(word,3,3),]$count3/(sum(letter_stats$count3)) *
-      letter_stats[letter_stats$letter == str_sub(word,4,4),]$count4/(sum(letter_stats$count4) ) *
-      letter_stats[letter_stats$letter == str_sub(word,5,5),]$count5/(sum(letter_stats$count5) ) 
+    letter_stats[letter_stats$letter == str_sub(word,1,1),]$count1/length(wlist)*
+      letter_stats[letter_stats$letter == str_sub(word,2,2),]$count2/length(wlist) * 
+      letter_stats[letter_stats$letter == str_sub(word,3,3),]$count3/length(wlist) *
+      letter_stats[letter_stats$letter == str_sub(word,4,4),]$count4/length(wlist) *
+      letter_stats[letter_stats$letter == str_sub(word,5,5),]$count5/length(wlist) 
   )
   log_score 
 }
-
-# Next - weight by usage of the word in English
-# what the fuck?
-wlist <- wlist[wlist != 'fête']
 
 add_scores <- wlist %>% 
   map_chr(word_score_add)
