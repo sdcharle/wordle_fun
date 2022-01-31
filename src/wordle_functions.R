@@ -17,6 +17,15 @@ https://www.r-bloggers.com/2022/01/shinywordle-a-shiny-app-to-solve-the-game-wor
 So as a follow-up, it appears there are already at least 2 posts on R Bloggers about Wordle, 
 but I'm going to save the links for now and not look at them 'til I've taken a crack at it.
 
+words we've seen
+cloud
+wrung 
+
+both 'low scores' as far as matching other things
+
+Google book ngrams
+https://screenrant.com/wordle-answers-updated-word-puzzle-guide/
+
 "
 library(words)
 library(vwr)
@@ -35,7 +44,10 @@ five_ww <- words[str_length(words) == 5]
 
 fww <- tibble(w = five_ww)
 feww <- tibble(w = five_ew)
-
+# too big - proprocess!
+#freqs <- read_csv(glue("/cloud/project/WordleR/data/unigram_freq.csv"))
+#freqs <- freqs %>% 
+#  filter(str_length(word) == 5)
 # filter list based on wordle hints
 # let's compare dictionaries
 wlist <- five_ew # big list
@@ -95,30 +107,40 @@ word_score_mult <- function(word) {
   log_score 
 }
 
-add_scores <- wlist %>% 
-  map_chr(word_score_add)
-
-mult_scores <- wlist %>% 
-  map_chr(word_score_mult)
-
-word_scores = tibble(word = wlist,
-                     add_score = add_scores,
-                     mult_score = mult_scores)
-
-# words w/ 5 distinct letters only
-unique_letters <- function(word) {
-  length(unique(unlist(str_split(word,''))))
+# check word against target
+check_word <- function(word, target) {
+  match_indexes = c()
+  green_letters = c()
+  overlaps = intersect(str_split(word,'')[[1]], str_split(target,'')[[1]])
+  not_in_word = setdiff(str_split(word,'')[[1]], str_split(target,'')[[1]])
+  for (i in 1:str_length(target)) {
+    if (str_sub(word, i, i) == str_sub(target, i, i)) {
+      match_indexes = c(match_indexes, i)
+      green_letters = c(green_letters, str_split(target,'')[[1]][i])
+      overlaps = setdiff(overlaps, str_sub(word, i,i))
+    }
+  }
+  
+  result = list()
+  result$yellow = overlaps
+  result$green = match_indexes
+  result$green_letters = green_letters
+  result$not_in_word = not_in_word
+  result
 }
 
-word_scores$l_count = map_int(word_scores$word, unique_letters)
-
-best_scores <- word_scores %>% 
-  filter(l_count == 5)
-
-best_scores <- best_scores %>% 
-  mutate(a_rank = rank(desc(add_score))) %>% 
-  mutate(m_rank = rank((mult_score)))
-
-group <- best_scores %>% filter(word %in% c('judge','devil','surly','heats', 'stead'))
-
-# by English usage
+# check word against pattern
+# wordle_pattern is result from above
+# don't do the compare, get regex then mass compare
+filter_word_regex <- function(wordle_pattern) {
+  # make regex!
+  pattern = "^"
+  for (i in 1:5) {
+    if (i %in% wordle_pattern$green) {
+      pattern = c(pattern, wordle_pattern$green_letters[match(i,wordle_pattern$green)])
+    } else {
+      pattern = c(pattern,'.')
+    }
+  }
+  regex(paste(pattern, collapse = ''))
+} 
