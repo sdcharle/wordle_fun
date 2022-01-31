@@ -3,7 +3,6 @@ R word list packages
 
 words (scrabble dictionary)
 Grady Ward's English words
-Don't forget Wordnet
 english.words (CELEX database) in vwr package https://www.rdocumentation.org/packages/vwr/versions/0.3.0/topics/english.words
 http://wordlist.aspell.net/
 https://www.r-bloggers.com/2010/10/lists-of-english-words/

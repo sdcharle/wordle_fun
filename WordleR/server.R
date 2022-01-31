@@ -10,11 +10,10 @@
 library(shiny)
 
 
-source("../src/wordle_functions.R")
+source("wordle_functions.R")
 
-word_scores <- readRDS("../data/word_scores.RDS") %>% 
+word_scores <- readRDS("data/word_scores.RDS") %>% 
   select(-l_count)
-
 
 clean_text <- function(text) {
   text <- str_replace_all(str_to_lower(text), regex("[^a-z]"),'')

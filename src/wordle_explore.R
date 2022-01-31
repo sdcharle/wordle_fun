@@ -33,7 +33,7 @@ library(tidyverse)
 library(stringr)
 library(glue)
 
-source('wordle_functions.R')
+source('/cloud/project/WordleR/wordle_functions.R')
 
 add_scores <- wlist %>% 
   map_chr(word_score_add)
