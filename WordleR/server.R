@@ -1,19 +1,13 @@
-#
-# This is the server logic of a Shiny web application. You can run the
-# application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
+# Based on the breakout superstar game Wordle
 
 library(shiny)
-
 
 source("wordle_functions.R")
 
 word_scores <- readRDS("data/word_scores.RDS") %>% 
-  select(-l_count)
+  select(-l_count) %>% 
+  mutate(add_score = as.numeric(add_score),
+         mult_score = as.numeric(mult_score))
 
 clean_text <- function(text) {
   text <- str_replace_all(str_to_lower(text), regex("[^a-z]"),'')
