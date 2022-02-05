@@ -20,12 +20,11 @@ clean_text <- function(text) {
 
 filter_scores <- function(not_in_word, position_chars, not_at_position) {
 
-  print("filter")
   # still filter for in word but add filtering based on position
   in_word =  unique(str_split(paste(not_at_position, collapse = ''), '')[[1]])
   print(glue("in word be:{in_word}"))
   not_in_word = unique(str_split(not_in_word,'')[[1]])
-  print("exact match")
+
   matcher <- c("^")
   for (c in position_chars) {
     if (c == '') { 
@@ -37,7 +36,7 @@ filter_scores <- function(not_in_word, position_chars, not_at_position) {
   matcher <- regex(paste(matcher, collapse = ''))
 
   check_in_word <- function(x) {
-    print(glue("check in word {x}"))
+
     if (length(in_word) == 0) { 
       TRUE 
     } else {
@@ -52,7 +51,7 @@ filter_scores <- function(not_in_word, position_chars, not_at_position) {
   neg_matcher = c()
   for (i in 1:5) {
     if(str_length(not_at_position[i]) == 0) {
-      print("empty, skip")
+
       next
     }
     
@@ -63,11 +62,9 @@ filter_scores <- function(not_in_word, position_chars, not_at_position) {
 
     neg_matcher = c(neg_matcher, regex(paste(nm, collapse = '')) )
   }
-  print(glue("Neg matchers:{neg_matcher}"))
-  
+
   word_scores$df_not_in <- map_lgl(word_scores$word, check_not_in_word)
   word_scores$df_in <-  map_lgl(word_scores$word, check_in_word)
-  
   # add the neg match based on
   
   df <- word_scores %>% 
@@ -77,13 +74,10 @@ filter_scores <- function(not_in_word, position_chars, not_at_position) {
     select(-df_in, -df_not_in)
   
   for(nm in neg_matcher) {
-    print(glue("here we go {neg_matcher}"))
     df <- df %>% 
       filter(!str_detect(word, nm))
   }
-  
   df
-  
 }
 
 shinyServer(function(input, output) {
