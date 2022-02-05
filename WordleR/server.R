@@ -20,12 +20,13 @@ clean_text <- function(text) {
 
 filter_scores <- function(not_in_word, position_chars, not_at_position) {
 
-  matcher <- c("^")
+  print("filter")
   # still filter for in word but add filtering based on position
-  in_word =  unique(not_at_position[!is.na(not_at_position) & not_at_position != ''])
-  print(in_word)
+  in_word =  unique(str_split(paste(not_at_position, collapse = ''), '')[[1]])
+  print(glue("in word be:{in_word}"))
   not_in_word = unique(str_split(not_in_word,'')[[1]])
-  
+  print("exact match")
+  matcher <- c("^")
   for (c in position_chars) {
     if (c == '') { 
       matcher = c(matcher,'.')
@@ -36,10 +37,11 @@ filter_scores <- function(not_in_word, position_chars, not_at_position) {
   matcher <- regex(paste(matcher, collapse = ''))
 
   check_in_word <- function(x) {
+    print(glue("check in word {x}"))
     if (length(in_word) == 0) { 
       TRUE 
     } else {
-      length(intersect(str_split(x,'')[[1]], str_split(in_word,'')[[1]])) == str_length(in_word)
+      length(intersect(str_split(x,'')[[1]], in_word)) == length(in_word)
     }
   }
   
@@ -75,6 +77,7 @@ filter_scores <- function(not_in_word, position_chars, not_at_position) {
     select(-df_in, -df_not_in)
   
   for(nm in neg_matcher) {
+    print(glue("here we go {neg_matcher}"))
     df <- df %>% 
       filter(!str_detect(word, nm))
   }
