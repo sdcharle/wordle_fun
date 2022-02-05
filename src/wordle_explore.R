@@ -17,7 +17,19 @@ https://www.r-bloggers.com/2022/01/shinywordle-a-shiny-app-to-solve-the-game-wor
 So as a follow-up, it appears there are already at least 2 posts on R Bloggers about Wordle, 
 but I'm going to save the links for now and not look at them 'til I've taken a crack at it.
 
+
+
 words we've seen
+
+Competition
+https://github.com/Kinkelin/WordleCompetition
+
+First 200
+
+https://github.com/Kinkelin/WordleCompetition/blob/main/data/official/wordle_historic_words.txt
+
+
+
 cloud
 wrung 
 
@@ -32,23 +44,38 @@ library(vwr)
 library(tidyverse)
 library(stringr)
 library(glue)
-
+library(janitor)
 source('/cloud/project/WordleR/wordle_functions.R')
 
-add_scores <- wlist %>% 
-  map_chr(word_score_add)
 
-mult_scores <- wlist %>% 
-  map_chr(word_score_mult)
+unis <- read_csv("WordleR/data/unigram_freq.csv")  %>% 
+  filter(str_length(word) == 5)
 
-word_scores = tibble(word = wlist,
-                     add_score = add_scores,
-                     mult_score = mult_scores)
+so_far <- read_csv("WordleR/data/wordles_so_far.txt")
+
+word_scores <- tibble(word = wlist)
+
+word_scores <- word_scores %>% left_join(unis)
+
+
+# dropped 'wooer' which is in the so far list. Otherwise fuck it.
+
+word_scores <- word_scores %>% 
+  filter(!is.na(count)) %>% 
+  mutate(freq = count/sum(count))
+
 
 # words w/ 5 distinct letters only
 unique_letters <- function(word) {
   length(unique(unlist(str_split(word,''))))
 }
+
+letter_stats <- get_letter_stats(word_scores, TRUE)
+
+mult_scores <- word_scores$word %>% 
+  map_chr(word_score_mult)
+
+word_scores$mult_score =  mult_scores
 
 word_scores$l_count = map_int(word_scores$word, unique_letters)
 
@@ -56,7 +83,14 @@ best_scores <- word_scores %>%
   filter(l_count == 5)
 
 best_scores <- best_scores %>% 
-  mutate(a_rank = rank(desc(add_score))) %>% 
-  mutate(m_rank = rank((mult_score)))
+  mutate(rank = rank((mult_score)))
 
 group <- best_scores %>% filter(word %in% c('judge','devil','surly','heats', 'stead'))
+
+NOTES <- "
+
+Some CS clown says 'later' is best(is it?)
+
+Latest (weighted) says pores toils cores tares tones
+
+"

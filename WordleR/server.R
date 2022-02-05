@@ -1,27 +1,29 @@
 # Based on the breakout superstar game Wordle
-
+# elements is not_r_c
 library(shiny)
-
 source("wordle_functions.R")
 
-word_scores <- readRDS("data/word_scores.RDS") %>% 
-  select(-l_count) %>% 
-  mutate(add_score = as.numeric(add_score),
-         mult_score = as.numeric(mult_score))
+word_scores <- readRDS("data/word_scores.RDS")
+so_far <- read_csv("data/wordles_so_far.txt")
+
+word_scores <- word_scores %>% 
+  mutate(previous_answer = word %in% so_far$word) %>% 
+  mutate(log_freq = log(freq)) %>% 
+  select(-l_count, -freq, -count) %>% 
+  mutate(mult_score = as.numeric(mult_score)) %>% 
+  mutate(rank = rank((-mult_score)))
 
 clean_text <- function(text) {
   text <- str_replace_all(str_to_lower(text), regex("[^a-z]"),'')
   text
 }
 
-filter_scores <- function(in_word, not_in_word, position_chars) {
-  print(in_word)
-  print(str_length(in_word))
-  print(not_in_word)
-  
+filter_scores <- function(not_in_word, position_chars, not_at_position) {
+
   matcher <- c("^")
-  
-  in_word = unique(str_split(in_word,'')[[1]])
+  # still filter for in word but add filtering based on position
+  in_word =  unique(not_at_position[!is.na(not_at_position) & not_at_position != ''])
+  print(in_word)
   not_in_word = unique(str_split(not_in_word,'')[[1]])
   
   for (c in position_chars) {
@@ -34,21 +36,48 @@ filter_scores <- function(in_word, not_in_word, position_chars) {
   matcher <- regex(paste(matcher, collapse = ''))
 
   check_in_word <- function(x) {
-    length(intersect(str_split(x,'')[[1]], in_word)) == length(in_word)
+    if (length(in_word) == 0) { 
+      TRUE 
+    } else {
+      length(intersect(str_split(x,'')[[1]], str_split(in_word,'')[[1]])) == str_length(in_word)
+    }
   }
   
   check_not_in_word <- function(x) {
     length(intersect(str_split(x,'')[[1]], not_in_word)) == 0
   }
   
+  neg_matcher = c()
+  for (i in 1:5) {
+    if(str_length(not_at_position[i]) == 0) {
+      print("empty, skip")
+      next
+    }
+    
+    else {
+      nm = '^.....'
+      nm = glue("{str_sub(nm,1,i)}[{not_at_position[i]}]{str_sub(nm,i+1,5)}")
+    }
+
+    neg_matcher = c(neg_matcher, regex(paste(nm, collapse = '')) )
+  }
+  print(glue("Neg matchers:{neg_matcher}"))
+  
   word_scores$df_not_in <- map_lgl(word_scores$word, check_not_in_word)
   word_scores$df_in <-  map_lgl(word_scores$word, check_in_word)
   
-  df <-word_scores %>% 
+  # add the neg match based on
+  
+  df <- word_scores %>% 
     filter(str_detect(word, matcher) &
              df_not_in &
              df_in) %>% 
     select(-df_in, -df_not_in)
+  
+  for(nm in neg_matcher) {
+    df <- df %>% 
+      filter(!str_detect(word, nm))
+  }
   
   df
   
@@ -57,13 +86,19 @@ filter_scores <- function(in_word, not_in_word, position_chars) {
 shinyServer(function(input, output) {
 
   output$filteredTable <- DT::renderDT({
-    filter_scores(clean_text(input$in_word), 
-                  clean_text(input$not_in_word), 
+    filter_scores(clean_text(input$not_in_word), 
                   c(str_sub(clean_text(input$letter1),1,1),
                     str_sub(clean_text(input$letter2),1,1),
                     str_sub(clean_text(input$letter3),1,1),
                     str_sub(clean_text(input$letter4),1,1),
-                    str_sub(clean_text(input$letter5),1,1))
+                    str_sub(clean_text(input$letter5),1,1)),
+                  c(
+                    clean_text(input$not_1),
+                    clean_text(input$not_2),
+                    clean_text(input$not_3),
+                    clean_text(input$not_4),
+                    clean_text(input$not_5)
+                  )
                 )    }, 
     selection = 'single', 
     filter = 'top', 
@@ -74,5 +109,4 @@ shinyServer(function(input, output) {
       scrollY = 600,
       scroller = TRUE
     ) )
-
 })

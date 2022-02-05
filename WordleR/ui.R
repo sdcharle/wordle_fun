@@ -21,12 +21,28 @@ shinyUI(fluidPage(
       
       column(6,
             textInput("not_in_word",
-                        "Not in the word (just type the letters):",
+                        p("Not in the word (just type the letters):", style = "color:gray"),
                         value = ""),
-            textInput("in_word",
-                 "In the word (not sure where):",
-                 value = ""),
-           p(strong("In order")),
+            p(strong("In the word (but not here)"), style = "color:#CCCC00"),
+            
+           fluidRow(
+             column( 2, textInput("not_1",
+                                  NULL,
+                                  value = "")),
+             column( 2, textInput("not_2",
+                                  NULL,
+                                  value = "")),
+             column( 2, textInput("not_3",
+                                  NULL,
+                                  value = "")),
+             column( 2, textInput("not_4",
+                                  NULL,
+                                  value = "")),
+             column( 2, textInput("not_5",
+                                  NULL,
+                                  value = ""))),
+             
+           p(strong("In order"), style = "color:green"),
            fluidRow(
              column( 2, textInput("letter1",
                        NULL,
@@ -47,12 +63,12 @@ shinyUI(fluidPage(
         ),
        column(6,
    
-#        fillCol(flex = 1, height = '100%',
-                #  withSpinner(
+        fillCol(flex = 1, height = '100%',
+                  withSpinner(
                 DT::DTOutput("filteredTable", height = '100%')
-#) 
+) 
         
- #         )
+          )
        )
     )
 )

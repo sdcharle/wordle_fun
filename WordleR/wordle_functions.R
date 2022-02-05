@@ -25,7 +25,12 @@ both 'low scores' as far as matching other things
 Google book ngrams
 https://screenrant.com/wordle-answers-updated-word-puzzle-guide/
 
+ADD
+Weight different positions differently (like starting letters more important
+than ending)
+Use knowledge about yellow - where they are NOT!
 "
+
 library(words)
 library(vwr)
 library(tidyverse)
@@ -43,7 +48,7 @@ five_ww <- words[str_length(words) == 5]
 
 fww <- tibble(w = five_ww)
 feww <- tibble(w = five_ew)
-# too big - proprocess!
+# too big - preprocess!
 #freqs <- read_csv(glue("/cloud/project/WordleR/data/unigram_freq.csv"))
 #freqs <- freqs %>% 
 #  filter(str_length(word) == 5)
@@ -60,26 +65,55 @@ a_count = str_count(letters, pattern = 'a')
 wlist <- wlist[wlist != 'fête']
 # get it all
 alphas <- 'abcdefghijklmnopqrstuvwxyz'
-w_stats <- list()
 
-for (i in 1:26) {
-  all_count = str_count(letters, pattern = str_sub(alphas,i,i))
-  count1 = sum(str_detect(wlist, regex(glue("^{str_sub(alphas,i,i)}"))))
-  count2 = sum(str_detect(wlist, regex(glue("^.{str_sub(alphas,i,i)}"))))
-  count3 = sum(str_detect(wlist, regex(glue("^..{str_sub(alphas,i,i)}"))))
-  count4 = sum(str_detect(wlist, regex(glue("^...{str_sub(alphas,i,i)}"))))
-  count5 = sum(str_detect(wlist, regex(glue("^....{str_sub(alphas,i,i)}"))))
-  w_stats[[i]] = tibble(letter = str_sub(alphas,i,i),
-                        all_count = all_count,
-                        count1 = count1,
-                        count2 = count2,
-                        count3 = count3,
-                        count4 = count4,
-                        count5 = count5)
+get_letter_stats <- function(word_frame, weighted = FALSE) {
+  w_stats <- list()
+  for (i in 1:26) {
+    
+    # count this letter across everyting
+    all_count = str_count(letters, pattern = str_sub(alphas,i,i))
+    # later - doesn't like glue bro
+    df <- word_frame %>% 
+      mutate(
+        count1 =  as.integer(str_detect(word, regex(glue("^{str_sub(alphas,i,i)}")))),
+        count2 = str_detect(word, regex(glue("^.{str_sub(alphas,i,i)}"))),
+        count3 = str_detect(word, regex(glue("^..{str_sub(alphas,i,i)}"))),
+        count4 = str_detect(word, regex(glue("^...{str_sub(alphas,i,i)}"))) ,
+        count5 = str_detect(word, regex(glue("^....{str_sub(alphas,i,i)}")))
+    )
+    
+    if(weighted) {
+      df <- df %>% 
+        mutate(count1 = as.integer(count1)*freq,
+               count2 = as.integer(count2)*freq,
+               count3 = as.integer(count3)*freq,
+               count4 = as.integer(count4)*freq,
+               count5 = as.integer(count5)*freq)
+    } else {
+      df <- df %>% 
+        mutate(count1 = as.integer(count1)/(nrow(df)),
+               count2 = as.integer(count2)/(nrow(df)),
+               count3 = as.integer(count3)/(nrow(df)),
+               count4 = as.integer(count4)/(nrow(df)),
+               count5 = as.integer(count5)/(nrow(df)))
+    }
+    
+    
+    w_stats[[i]] = tibble(letter = str_sub(alphas,i,i),
+                          all_count = all_count,
+                          count1 = sum(df$count1),
+                          count2 = sum(df$count2),
+                          count3 = sum(df$count3),
+                          count4 = sum(df$count4),
+                          count5 = sum(df$count5))
+  }
+  
+  letter_stats <- do.call(rbind, w_stats)
+  letter_stats
 }
 
-letter_stats <- do.call(rbind, w_stats)
 
+# this approach bloze
 word_score_add <- function(word) {
   score = 0
   for (i in 1:5) { # go over letters and sum up if they appear anywhere
@@ -93,15 +127,15 @@ word_score_add <- function(word) {
   score
 }
 
-# multiplicative - overflows or underflows - use logs to our advantage?
 # this based just on if there's a direct hit
+# try weigh
 word_score_mult <- function(word) {
   log_score = log(
-    letter_stats[letter_stats$letter == str_sub(word,1,1),]$count1/length(wlist)*
-      letter_stats[letter_stats$letter == str_sub(word,2,2),]$count2/length(wlist) * 
-      letter_stats[letter_stats$letter == str_sub(word,3,3),]$count3/length(wlist) *
-      letter_stats[letter_stats$letter == str_sub(word,4,4),]$count4/length(wlist) *
-      letter_stats[letter_stats$letter == str_sub(word,5,5),]$count5/length(wlist) 
+    letter_stats[letter_stats$letter == str_sub(word,1,1),]$count1 *
+      letter_stats[letter_stats$letter == str_sub(word,2,2),]$count2 * 
+      letter_stats[letter_stats$letter == str_sub(word,3,3),]$count3 *
+      letter_stats[letter_stats$letter == str_sub(word,4,4),]$count4 *
+      letter_stats[letter_stats$letter == str_sub(word,5,5),]$count5 
   )
   log_score 
 }
@@ -131,6 +165,8 @@ check_word <- function(word, target) {
 # check word against pattern
 # wordle_pattern is result from above
 # don't do the compare, get regex then mass compare
+# possibly - add spinner back!
+
 filter_word_regex <- function(wordle_pattern) {
   # make regex!
   pattern = "^"

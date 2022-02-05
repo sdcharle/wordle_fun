@@ -1,3 +1,4 @@
+word
 cigar
 rebut
 sissy
@@ -198,3 +199,7 @@ rebus
 boost
 truss
 siege
+moist
+light
+shard
+pleat
