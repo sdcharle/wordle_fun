@@ -1,5 +1,4 @@
 # Based on the breakout superstar game Wordle
-# elements is not_r_c
 library(shiny)
 source("wordle_functions.R")
 
@@ -20,9 +19,7 @@ clean_text <- function(text) {
 
 filter_scores <- function(not_in_word, position_chars, not_at_position) {
 
-  # still filter for in word but add filtering based on position
   in_word =  unique(str_split(paste(not_at_position, collapse = ''), '')[[1]])
-  print(glue("in word be:{in_word}"))
   not_in_word = unique(str_split(not_in_word,'')[[1]])
 
   matcher <- c("^")
@@ -35,37 +32,31 @@ filter_scores <- function(not_in_word, position_chars, not_at_position) {
   }
   matcher <- regex(paste(matcher, collapse = ''))
 
-  check_in_word <- function(x) {
-
-    if (length(in_word) == 0) { 
-      TRUE 
-    } else {
-      length(intersect(str_split(x,'')[[1]], in_word)) == length(in_word)
-    }
-  }
-  
-  check_not_in_word <- function(x) {
-    length(intersect(str_split(x,'')[[1]], not_in_word)) == 0
-  }
-  
   neg_matcher = c()
   for (i in 1:5) {
     if(str_length(not_at_position[i]) == 0) {
-
       next
-    }
-    
-    else {
+    } else {
       nm = '^.....'
       nm = glue("{str_sub(nm,1,i)}[{not_at_position[i]}]{str_sub(nm,i+1,5)}")
     }
 
     neg_matcher = c(neg_matcher, regex(paste(nm, collapse = '')) )
   }
+  
+  check_not_in_word <- function(x) {
+    length(intersect(str_split(x,'')[[1]], not_in_word)) == 0
+  }
+  check_in_word <- function(x) {
+    if (length(in_word) == 0) { 
+      TRUE 
+    } else {
+      length(intersect(str_split(x,'')[[1]], in_word)) == length(in_word)
+    }
+  }
 
   word_scores$df_not_in <- map_lgl(word_scores$word, check_not_in_word)
   word_scores$df_in <-  map_lgl(word_scores$word, check_in_word)
-  # add the neg match based on
   
   df <- word_scores %>% 
     filter(str_detect(word, matcher) &
@@ -78,6 +69,7 @@ filter_scores <- function(not_in_word, position_chars, not_at_position) {
       filter(!str_detect(word, nm))
   }
   df
+  # dynamic exclude update?
 }
 
 shinyServer(function(input, output, session) {

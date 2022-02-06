@@ -56,6 +56,13 @@ feww <- tibble(w = five_ew)
 # let's compare dictionaries
 wlist <- five_ew # big list
 
+# missing some tho including some biggies!
+
+wlist <- c(wlist,
+           'roate',
+           'aeros' )
+
+
 # raw counts of letters
 letters <- stringr::str_c(wlist, collape = '')
 letters <- stringr::str_flatten(wlist, collapse = "")
