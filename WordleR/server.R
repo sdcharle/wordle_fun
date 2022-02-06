@@ -80,8 +80,22 @@ filter_scores <- function(not_in_word, position_chars, not_at_position) {
   df
 }
 
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
 
+  observeEvent(input$clearChoices, {
+    updateTextInput(session, "not_in_word", value = "")
+    updateTextInput(session, "letter1", value = "")
+    updateTextInput(session, "letter2", value = "")
+    updateTextInput(session, "letter3", value = "")
+    updateTextInput(session, "letter4", value = "")
+    updateTextInput(session, "letter5", value = "")
+    updateTextInput(session, "not_1", value = "")
+    updateTextInput(session, "not_2", value = "")
+    updateTextInput(session, "not_3", value = "")
+    updateTextInput(session, "not_4", value = "")
+    updateTextInput(session, "not_5", value = "")
+  })
+  
   output$filteredTable <- DT::renderDT({
     filter_scores(clean_text(input$not_in_word), 
                   c(str_sub(clean_text(input$letter1),1,1),

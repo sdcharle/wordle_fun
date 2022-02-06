@@ -59,7 +59,8 @@ shinyUI(fluidPage(
              column( 2, textInput("letter5",
                                   NULL,
                                   value = ""))
-           )
+           ),
+           actionButton("clearChoices", "Clear Filters")
         ),
        column(6,
    

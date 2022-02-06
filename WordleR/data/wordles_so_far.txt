@@ -203,3 +203,5 @@ moist
 light
 shard
 pleat
+aloft
+skill
