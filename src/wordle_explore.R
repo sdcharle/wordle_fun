@@ -7,6 +7,8 @@ http://wordlist.aspell.net/
 https://www.r-bloggers.com/2010/10/lists-of-english-words/
 syn (kind of like wordnet-- though?)
 
+# actually sowpods is better dictionary: https://github.com/jesstess/Scrabble/blob/master/scrabble/sowpods.txt
+
 sentences, fruit and words datasets are embedded in stringr (too small)
 
 https://www.r-bloggers.com/2022/01/playing-wordle-in-r/
@@ -49,7 +51,13 @@ unis <- read_csv("/cloud/project/WordleR/data/unigram_freq.csv")  %>%
 
 so_far <- read_csv("/cloud/project/WordleR/data/wordles_so_far.txt")
 
-word_scores <- tibble(word = wlist)
+word_scores <- read_csv("/cloud/project/WordleR/data/sowpods.txt", col_names = FALSE) %>% 
+  rename(word = X1) %>% 
+  filter(str_length(word) == 5) %>% 
+  mutate(word = str_to_lower(word))
+
+
+#word_scores <- tibble(word = wlist)
 
 word_scores <- word_scores %>% left_join(unis)
 
