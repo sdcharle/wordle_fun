@@ -12,6 +12,7 @@ sentences, fruit and words datasets are embedded in stringr
 
 https://www.r-bloggers.com/2022/01/playing-wordle-in-r/
 https://www.r-bloggers.com/2022/01/shinywordle-a-shiny-app-to-solve-the-game-worldle-and-the-power-of-regular-expressions/
+https://screenrant.com/wordle-answers-updated-word-puzzle-guide/
 
 So as a follow-up, it appears there are already at least 2 posts on R Bloggers about Wordle, 
 but I'm going to save the links for now and not look at them 'til I've taken a crack at it.
@@ -23,12 +24,11 @@ wrung
 both 'low scores' as far as matching other things
 
 Google book ngrams
-https://screenrant.com/wordle-answers-updated-word-puzzle-guide/
 
 ADD
 Weight different positions differently (like starting letters more important
 than ending)
-Use knowledge about yellow - where they are NOT!
+
 "
 
 library(words)
