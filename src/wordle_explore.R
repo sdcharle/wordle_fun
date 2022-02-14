@@ -37,6 +37,11 @@ https://screenrant.com/wordle-answers-updated-word-puzzle-guide/
 Dictionaries - my dictionary is missing words wordle accepts or words that
 should be in there
 
+Other: 
+https://github.com/first20hours/google-10000-english/blob/master/google-10000-english-usa-no-swears.txt
+
+
+
 "
 library(words)
 library(vwr)
@@ -94,6 +99,9 @@ word_scores$mult_score =  mult_scores
 
 word_scores$l_count = map_int(word_scores$word, unique_letters)
 
+word_scores <- word_scores %>% 
+  mutate(rank = rank((mult_score)))
+
 best_scores <- word_scores %>% 
   filter(l_count == 5)
 
@@ -114,29 +122,26 @@ group <- best_scores %>% filter(word %in% c('judge',
 
 # three - grams?
 
-w <- word_scores$word
+#w <- word_scores$word
 
-trigrams <- function(x) {
-  c(str_sub(x,1,3),str_sub(x,2,4),str_sub(x,3,5))
-}
+#trigrams <- function(x) {
+#  c(str_sub(x,1,3),str_sub(x,2,4),str_sub(x,3,5))
+#}
 
-trigrams('roast')
-
-tg <- map(w,trigrams)
-
-tg <- unlist(tg)
-
-tg <- tibble(trigram = tg) %>% count(trigram)
+#tg <- map(w,trigrams)
+#tg <- unlist(tg)
+#tg <- tibble(trigram = tg) %>% count(trigram)
 
 saveRDS(word_scores, "/cloud/project/WordleR/data/word_scores.RDS")
-saveRDS(tg, "/cloud/project/WordleR/data/trigrams.RDS")
+#saveRDS(tg, "/cloud/project/WordleR/data/trigrams.RDS")
 NOTES <- "
-
 Some CS clown says 'later' is best(is it?)
-
-Latest (weighted) says pores toils cores tares tones
 
 my cousin's 'ROAST' is pretty great
 also 'ROATE' which is barely a word
+toeas
+
+some clown claiming 'salet' is best.
+You can get the word list from the Javascript.
 
 "
