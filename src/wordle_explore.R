@@ -16,19 +16,9 @@ https://www.r-bloggers.com/2022/01/shinywordle-a-shiny-app-to-solve-the-game-wor
 
 I'm going to save the links for now and not look at them 'til I've taken a crack at it.
 
-words we've seen
-
 Competition
 https://github.com/Kinkelin/WordleCompetition
-
-First 200
-
 https://github.com/Kinkelin/WordleCompetition/blob/main/data/official/wordle_historic_words.txt
-
-cloud
-wrung 
-
-both 'low scores' as far as matching other things
 
 Google book ngrams
 
@@ -39,16 +29,16 @@ should be in there
 
 Other: 
 https://github.com/first20hours/google-10000-english/blob/master/google-10000-english-usa-no-swears.txt
-
-
-
 "
 library(words)
-library(vwr)
+#library(vwr)
 library(tidyverse)
 library(stringr)
 library(glue)
 library(janitor)
+library(stringdist)
+library(hclust)
+
 source('/cloud/project/WordleR/wordle_functions.R')
 
 unis <- read_csv("/cloud/project/WordleR/data/unigram_freq.csv")  %>% 
@@ -61,12 +51,8 @@ word_scores <- read_csv("/cloud/project/WordleR/data/sowpods.txt", col_names = F
   filter(str_length(word) == 5) %>% 
   mutate(word = str_to_lower(word))
 
-
-#word_scores <- tibble(word = wlist)
-
 word_scores <- word_scores %>% left_join(unis)
 
-# dropped 'wooer' which is in the so far list. Otherwise fuck it.
 
 # let's do wilding. Just give na's the fifth percentile of count.
 word_scores <- word_scores %>% 
@@ -75,13 +61,11 @@ word_scores <- word_scores %>%
 word_scores <- word_scores %>% 
   mutate(freq = count/sum(count))
 
-
 # find out how many is left after filtration
 
 filter_count <- function(x) {
   nrow(word_scores %>% filter(!str_detect(word,regex(glue("[{x}]")))))
 }
-
 
 word_scores$exclude_count <- map_int(word_scores$word, filter_count)
 
@@ -108,26 +92,9 @@ best_scores <- word_scores %>%
 best_scores <- best_scores %>% 
   mutate(rank = rank((mult_score)))
 
-group <- best_scores %>% filter(word %in% c('judge',
-                                            'devil',
-                                            'surly',
-                                            'heats', 
-                                            'stead',
-                                            'salty',
-                                            'roate',
-                                            'later',
-                                            'roast'))
-
-# dump for the app to use!
-
-# three - grams?
-
-#w <- word_scores$word
-
 #trigrams <- function(x) {
 #  c(str_sub(x,1,3),str_sub(x,2,4),str_sub(x,3,5))
 #}
-
 #tg <- map(w,trigrams)
 #tg <- unlist(tg)
 #tg <- tibble(trigram = tg) %>% count(trigram)
@@ -136,12 +103,38 @@ saveRDS(word_scores, "/cloud/project/WordleR/data/word_scores.RDS")
 #saveRDS(tg, "/cloud/project/WordleR/data/trigrams.RDS")
 NOTES <- "
 Some CS clown says 'later' is best(is it?)
-
+some clown claiming 'salet' is best.
 my cousin's 'ROAST' is pretty great
 also 'ROATE' which is barely a word
 toeas
-
-some clown claiming 'salet' is best.
 You can get the word list from the Javascript.
-
 "
+
+library(stringdist)
+# dude says JW is fly: https://amunategui.github.io/stringdist/
+
+# hmmm...let's truncate words some, first? like top 1000???
+
+subset <- word_scores %>% 
+  arrange(desc(freq)) %>% 
+  head(1000)
+library(tictoc)
+tic("get matrix")
+distancemodels <- stringdistmatrix(subset$word, subset$word, method = "jw")
+toc()
+rownames(distancemodels) <- subset$word
+hc <- hclust(as.dist(distancemodels))
+# https://uc-r.github.io/hc_clustering
+plot(hc)
+
+twofer <- rect.hclust(hc,k = 25) # if ye want 20 clusts
+# https://amunategui.github.io/stringdist/
+# Can calculate various string distances based on edits (Damerau-Levenshtein, Hamming, Levenshtein, optimal sting alignment), 
+# qgrams (qgram, cosine, jaccard distance) or 
+# heuristic metrics (Jaro, Jaro-Winkler)
+
+for (thing in twofer) {
+  print(length(thing))
+}
+
+# not too even, yo....

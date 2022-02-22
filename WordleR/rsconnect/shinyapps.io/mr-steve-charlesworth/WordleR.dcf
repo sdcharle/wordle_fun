@@ -5,9 +5,9 @@ account: mr-steve-charlesworth
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 5544682
-bundleId: 5573606
+bundleId: 5598197
 url: https://mr-steve-charlesworth.shinyapps.io/WordleR/
-when: 1644722613.04383
-lastSyncTime: 1644722613.04384
+when: 1645320428.87162
+lastSyncTime: 1645320428.87164
 asMultiple: FALSE
 asStatic: FALSE

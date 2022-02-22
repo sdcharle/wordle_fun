@@ -138,11 +138,11 @@ word_score_add <- function(word) {
 # try weigh
 word_score_mult <- function(word) {
   log_score = log(
-    letter_stats[letter_stats$letter == str_sub(word,1,1),]$count1 *
+    (letter_stats[letter_stats$letter == str_sub(word,1,1),]$count1)^3 *
       letter_stats[letter_stats$letter == str_sub(word,2,2),]$count2 * 
       letter_stats[letter_stats$letter == str_sub(word,3,3),]$count3 *
       letter_stats[letter_stats$letter == str_sub(word,4,4),]$count4 *
-      letter_stats[letter_stats$letter == str_sub(word,5,5),]$count5 
+      (letter_stats[letter_stats$letter == str_sub(word,5,5),]$count5)^2 
   )
   log_score 
 }
