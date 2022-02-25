@@ -216,3 +216,6 @@ swill
 tacit
 other
 thorn
+trove
+bloke
+vivid
