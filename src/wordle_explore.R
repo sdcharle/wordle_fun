@@ -29,15 +29,17 @@ should be in there
 
 Other: 
 https://github.com/first20hours/google-10000-english/blob/master/google-10000-english-usa-no-swears.txt
+
+
+Actually - just use stuff from the word list.
+
 "
-library(words)
-#library(vwr)
 library(tidyverse)
 library(stringr)
 library(glue)
 library(janitor)
 library(stringdist)
-library(hclust)
+#library(hclust) - not avail wut?
 
 source('/cloud/project/WordleR/wordle_functions.R')
 
@@ -46,9 +48,18 @@ unis <- read_csv("/cloud/project/WordleR/data/unigram_freq.csv")  %>%
 
 so_far <- read_csv("/cloud/project/WordleR/data/wordles_so_far.txt")
 
-word_scores <- read_csv("/cloud/project/WordleR/data/sowpods.txt", col_names = FALSE) %>% 
-  rename(word = X1) %>% 
-  filter(str_length(word) == 5) %>% 
+#word_scores <- read_csv("/cloud/project/WordleR/data/sowpods.txt", col_names = FALSE) %>% 
+#  rename(word = X1) %>% 
+#  filter(str_length(word) == 5) %>% 
+#  mutate(word = str_to_lower(word))
+
+allowed <- readRDS('/cloud/project/WordleR/data/nyt_wordle_allowed_guesses.rds')
+possible <- readRDS('/cloud/project/WordleR/data/nyt_wordle.rds')
+
+allowed$possible_answer = FALSE
+possible$possible_answer = TRUE
+
+word_scores <- rbind(allowed, possible) %>% 
   mutate(word = str_to_lower(word))
 
 word_scores <- word_scores %>% left_join(unis)
