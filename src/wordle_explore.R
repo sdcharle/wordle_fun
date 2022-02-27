@@ -1,20 +1,11 @@
 NOTES <- "
-R word list packages
-words (scrabble dictionary) <- not enough, forget it!
-Grady Ward's English words
-english.words (CELEX database) in vwr package https://www.rdocumentation.org/packages/vwr/versions/0.3.0/topics/english.words
-http://wordlist.aspell.net/
+
 https://www.r-bloggers.com/2010/10/lists-of-english-words/
-syn (kind of like wordnet-- though?)
 
-# actually sowpods is better dictionary: https://github.com/jesstess/Scrabble/blob/master/scrabble/sowpods.txt
-
-sentences, fruit and words datasets are embedded in stringr (too small)
+# sowpods is better dictionary: https://github.com/jesstess/Scrabble/blob/master/scrabble/sowpods.txt
 
 https://www.r-bloggers.com/2022/01/playing-wordle-in-r/
 https://www.r-bloggers.com/2022/01/shinywordle-a-shiny-app-to-solve-the-game-worldle-and-the-power-of-regular-expressions/
-
-I'm going to save the links for now and not look at them 'til I've taken a crack at it.
 
 Competition
 https://github.com/Kinkelin/WordleCompetition
@@ -24,12 +15,8 @@ Google book ngrams
 
 https://screenrant.com/wordle-answers-updated-word-puzzle-guide/
 
-Dictionaries - my dictionary is missing words wordle accepts or words that
-should be in there
-
 Other: 
 https://github.com/first20hours/google-10000-english/blob/master/google-10000-english-usa-no-swears.txt
-
 
 Actually - just use stuff from the word list.
 
@@ -85,7 +72,8 @@ unique_letters <- function(word) {
   length(unique(unlist(str_split(word,''))))
 }
 
-letter_stats <- get_letter_stats(word_scores, TRUE)
+# actually just use possible answers here!
+letter_stats <- get_letter_stats(word_scores %>% filter(possible_answer == TRUE), TRUE)
 
 mult_scores <- word_scores$word %>% 
   map_chr(word_score_mult)
