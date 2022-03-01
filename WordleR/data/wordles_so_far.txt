@@ -222,3 +222,4 @@ vivid
 spill
 chant
 choke
+rupee
