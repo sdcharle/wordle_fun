@@ -80,6 +80,7 @@ shinyUI(fluidPage(
                          p(strong("exclude_count:"), " this is mostly for Absurdle. Means if all the letters in this word are eliminated, how many words are left?"),
                          p(strong("mult_score:"), " this is based on how often the word's letters appear at the same position in the dictionary over all."),
                          p(strong("previous_answer:"), " has this word previously been a Wordle solution?"),
+                         p(strong("possible_answer:"), " in Wordle there's a distinction between 'allowed guess' and 'possible answer'."),
                          p(strong("log_freq:"), " measure of how frequently the word appears in usage. Used logs because the numbers are generally small."),
                          p(strong("rank:"), " rank of the mult_score over all words in our dictionary.")
                 )
