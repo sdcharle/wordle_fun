@@ -32,46 +32,45 @@ than ending)
 "
 
 library(words)
-library(vwr)
+#library(vwr)
 library(tidyverse)
 library(stringr)
 library(glue)
 
-data(english.words)
-data(words)
-length(english.words)
-length(words)
-five_ew <- english.words[str_length(english.words) == 5]
+#data(english.words)
+#data(words)
+#length(english.words)
+#length(words)
+#five_ew <- english.words[str_length(english.words) == 5]
 # about five thousand
-five_ww <- words[str_length(words) == 5]
+#five_ww <- words[str_length(words) == 5]
 # 200? that sucks.
-
-fww <- tibble(w = five_ww)
-feww <- tibble(w = five_ew)
+#fww <- tibble(w = five_ww)
+#feww <- tibble(w = five_ew)
 # too big - preprocess!
 #freqs <- read_csv(glue("/cloud/project/WordleR/data/unigram_freq.csv"))
 #freqs <- freqs %>% 
 #  filter(str_length(word) == 5)
 # filter list based on wordle hints
 # let's compare dictionaries
-wlist <- five_ew # big list
+#wlist <- five_ew # big list
 
 # missing some tho including some biggies!
 
-wlist <- c(wlist,
-           'roate',
-           'aeros' )
+#wlist <- c(wlist,
+#           'roate',
+#           'aeros' )
 
 
 # raw counts of letters
-letters <- stringr::str_c(wlist, collape = '')
-letters <- stringr::str_flatten(wlist, collapse = "")
-a_count = str_count(letters, pattern = 'a')
+#letters <- stringr::str_c(wlist, collape = '')
+#letters <- stringr::str_flatten(wlist, collapse = "")
+#a_count = str_count(letters, pattern = 'a')
 # Next - weight by usage of the word in English
 # what the fuck?
-wlist <- wlist[wlist != 'fête']
+#wlist <- wlist[wlist != 'fête']
 # get it all
-alphas <- 'abcdefghijklmnopqrstuvwxyz'
+#alphas <- 'abcdefghijklmnopqrstuvwxyz'
 
 get_letter_stats <- function(word_frame, weighted = FALSE) {
   w_stats <- list()
@@ -117,21 +116,6 @@ get_letter_stats <- function(word_frame, weighted = FALSE) {
   
   letter_stats <- do.call(rbind, w_stats)
   letter_stats
-}
-
-
-# this approach bloze
-word_score_add <- function(word) {
-  score = 0
-  for (i in 1:5) { # go over letters and sum up if they appear anywhere
-    score = score + 
-      letter_stats[letter_stats$letter == str_sub(word, i,i),]$count1 +
-      letter_stats[letter_stats$letter == str_sub(word, i,i),]$count2 +
-      letter_stats[letter_stats$letter == str_sub(word, i,i),]$count3 +
-      letter_stats[letter_stats$letter == str_sub(word, i,i),]$count4 +
-      letter_stats[letter_stats$letter == str_sub(word, i,i),]$count5 
-  }
-  score
 }
 
 # this based just on if there's a direct hit
