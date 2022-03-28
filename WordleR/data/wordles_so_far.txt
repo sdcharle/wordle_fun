@@ -247,3 +247,5 @@ purge
 chest
 depot
 epoxy
+nymph
+found
