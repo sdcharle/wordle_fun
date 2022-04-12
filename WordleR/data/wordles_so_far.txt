@@ -259,3 +259,4 @@ comma
 scare
 stair
 squad
+royal
